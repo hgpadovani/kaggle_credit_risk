@@ -1,9 +1,10 @@
 # search space for hyperparameter optimization
 
 from hyperopt import hp
+import numpy as np
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
-import XGBoost as xgb
-import LightGBM as lgb
+import xgboost as xgb
+import lightgbm as lgb
 
 
 xgb_space = {'model': xgb.XGBClassifier,
@@ -20,7 +21,7 @@ xgb_space = {'model': xgb.XGBClassifier,
                         }
             }
 
-lgm_space = {'model': lgm.LGBMClassifier,
+lgb_space = {'model': lgb.LGBMClassifier,
              'params': {
                       'class_weight': hp.choice('class_weight', [None, 'balanced']),
                       'boosting_type': hp.choice('boosting_type', [{'boosting_type': 'gbdt', 'subsample': hp.uniform('gdbt_subsample', 0.5, 1)}, 
@@ -52,7 +53,7 @@ gbc_space = {'model': GradientBoostingClassifier,
 					'subsample': hp.uniform( 'ss', 0.8, 1.0 ),
 					'max_depth': hp.quniform( 'md', 2, 10, 1 ),
 					'max_features': hp.choice( 'mf', ( 'sqrt', 'log2', None )),
-					'min_samples_leaf': hp.quniform( 'mss', 1, 10, 1 ),
+					'min_samples_leaf': hp.quniform( 'msl', 1, 10, 1 ),
 					'min_samples_split': hp.quniform( 'mss', 2, 20, 1 )
 					}
 			}

@@ -86,7 +86,7 @@ def get_catcodes(df):
 	return df, mappers
 
 
-def objective_lgbm(params, n_folds = N_FOLDS):
+def objective_lgbm(params):
     """Objective function for Gradient Boosting Machine Hyperparameter Optimization"""
     
     # Keep track of evals
@@ -108,7 +108,7 @@ def objective_lgbm(params, n_folds = N_FOLDS):
     start = timer()
     
     # Perform n_folds cross validation
-    cv_results = lgb.cv(params, train_set, num_boost_round = 10000, nfold = n_folds, 
+    cv_results = lgb.cv(params, train_set, num_boost_round = 10000, nfold = 5, 
                         early_stopping_rounds = 100, metrics = 'auc', seed = 50)
     
     run_time = timer() - start
@@ -133,7 +133,7 @@ def objective_lgbm(params, n_folds = N_FOLDS):
             'train_time': run_time, 'status': STATUS_OK}
 
 
-def objective(space, n_folds = N_FOLDS):
+def objective(space):
     """Objective function for Generic Model Hyperparameter Optimization"""
     
     # Keep track of evals
@@ -142,7 +142,7 @@ def objective(space, n_folds = N_FOLDS):
     ITERATION += 1
         
     # KFold cross-validation
-    kf = StratifiedKFold(n_splits = N_FOLDS)
+    kf = StratifiedKFold(n_splits = 5)
     
     # Getting the model
     model = space['model'](**space['params'])
@@ -177,7 +177,7 @@ def objective(space, n_folds = N_FOLDS):
     return {'loss': loss, 'params': params, 'iteration': ITERATION,
             'train_time': run_time, 'status': STATUS_OK}
 
-def optimize(objective, space, MAX_EVALS = 120, trials, output_file = 'BayesOpt.csv', random_state = 42):
+def optimize(objective, space, trials, MAX_EVALS = 120, output_file = 'BayesOpt.csv', random_state = 42):
     
     # Output file
     out_file = output_file
@@ -199,3 +199,39 @@ def optimize(objective, space, MAX_EVALS = 120, trials, output_file = 'BayesOpt.
     
     return space_eval(space, best)
     
+
+def ensemble_features(X_train, y_train, X_test, ratio, random_state=None, *models):
+
+    '''
+    Function that create new features based on an ensemble of models
+    Parameters:
+    -----------
+    Inputs:
+        X_train (dataframe, array): train feature matrix
+        y_train (series, array): train label vector
+        X_test (dataframe, array): test feature matrix
+        ratio (float): proportion of data rows to maintain on the new ensemble X,y
+        random_state (int): random seed
+        models (model): models to become new ensemble features
+    Returns:
+        X_train_ensemble (array): new X_train feature matrix
+        y_train_ensemble (array): new y_train label vector
+        X_test_ensemble (array): new X_test feature matrix
+    '''
+
+    n_models = len(models)
+    X_train_, X_test_, y_train_, y_train_ensemble = train_test_split(X_train,
+                                                                     y_train,
+                                                                     test_size=ratio,
+                                                                     stratify=y_train,
+                                                                     random_state=random_state)
+    X_train_ensemble = np.zeros((X_test_.shape[0],n_models))
+    X_test_ensemble = np.zeros((X_test.shape[0], n_models))
+
+    for i, model in enumerate(models):
+
+        model.fit(X_train_, y_train_)      
+        X_train_ensemble[:,i] = model.predict(X_test_)
+        X_test_ensemble[:,i] = model.predict(X_test)
+
+    return X_train_ensemble, y_train_ensemble, X_test_ensemble
