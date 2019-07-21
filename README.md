@@ -74,6 +74,7 @@ I've organized this repo using the following structure:
 	- 5 - Automated_Feature_Engineering -> Automated feature engineering using Deep Feature Syntesis with featuretools lib.
 	- 6 - Machine_Learning -> Notebook where I focused in applying several algorithms to the data. I've kept using tree based algorithms and its ensembles, and also created a few submission files with LightGBM, GradientBoostingClassifier, and (tried with) XGBoost.
 	- 7 - Hyperparameter_Tunning -> Bayesian Optimisation pipeline. I've used the TPE algorithm to tune LightGBM's parameters.
+	- 8 - Neural Nets -> This notebook brings neural network implementation. 
 - spaces
 	- search_spaces.py -> file where I've kept search spaces for a few algorithms.
 - submissions
